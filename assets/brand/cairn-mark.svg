@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cairn brand mark — "Trailhead"
+  Construction (256-unit canvas, all values integers):
+
+    stone   x      y     w     h    r    rotate
+    top     76     37    88    50   19   -2.5 deg
+    mid     64     99   140    52   20   +1.5 deg
+    base    30    163   196    56   21    0 deg
+
+  - Corner radius is 0.38 x stone height: flat enough to read as
+    stone, round enough to avoid reading as a bar chart.
+  - Seams are 12 units. At 48px that is 2.25px of background —
+    the smallest gap that survives without a favicon variant.
+  - Centre axes are offset (120 / 134 / 128) and the two upper
+    stones are micro-rotated. The stack leans; the base does not.
+    This is the "hand-stacked" property the V2 doc claimed but
+    never actually built — its three ellipses were all cx=128.
+  - Ink extent is x 30..226, y 37..219 (196 x 182), optically
+    centred on 128,128. Margin is 30 units = 11.7% — matches the
+    padding Chrome toolbar icons expect.
+
+  Primary, light backgrounds. Colour: #0B6250 (token cairn-primary).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"
+     role="img" aria-label="Cairn">
+  <title>Cairn</title>
+  <rect x="76" y="37" width="88" height="50" rx="19" ry="19" fill="#0B6250" transform="rotate(-2.5 120 62.0)"/>
+  <rect x="64" y="99" width="140" height="52" rx="20" ry="20" fill="#0B6250" transform="rotate(1.5 134 125.0)"/>
+  <rect x="30" y="163" width="196" height="56" rx="21" ry="21" fill="#0B6250"/>
+</svg>

@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cairn for Chrome — Open YouTube for One Thing. Leave When Done.</title>
+  <meta
+    name="description"
+    content="Cairn is a local-first Chrome extension for intentional YouTube viewing. Set a session goal, hide Shorts and rabbit-hole sidebars, highlight matching tutorials, and lock deep-work hours with zero Cairn servers."
+  />
+  <meta name="theme-color" content="#f3f6f4" />
+  <link rel="canonical" href="https://mohdashraf010897.github.io/cairn-public/" />
+  <link rel="icon" type="image/svg+xml" href="./assets/brand/cairn-mark-favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/brand/icon32.png" />
+
+  <!-- WhatsApp, LinkedIn & X Link Preview Metadata -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Cairn" />
+  <meta property="og:title" content="Cairn for Chrome — Intentional YouTube Without Rabbit Holes" />
+  <meta
+    property="og:description"
+    content="Ask why you opened YouTube, clear Shorts and algorithmic sidebars, highlight goal-matching videos, and lock focus for 1–8 hours. $0, 100% local, zero servers."
+  />
+  <meta property="og:url" content="https://mohdashraf010897.github.io/cairn-public/" />
+  <meta
+    property="og:image"
+    content="https://mohdashraf010897.github.io/cairn-public/assets/og-cairn-trailhead.png"
+  />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Cairn Chrome extension showing YouTube with Shorts hidden and goal-matching tutorials highlighted in Alpine Pine." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Cairn for Chrome — Open YouTube for One Thing. Leave When Done." />
+  <meta
+    name="twitter:description"
+    content="Hide Shorts, blur watch-next rabbit holes, highlight videos that match your goal, and lock focus hours. 100% local on Chrome."
+  />
+  <meta
+    name="twitter:image"
+    content="https://mohdashraf010897.github.io/cairn-public/assets/og-cairn-trailhead.png"
+  />
+
+  <link
+    rel="preload"
+    href="./fonts/hanken-grotesk-latin.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  />
+  <link rel="stylesheet" href="./styles/cairn-site.css" />
+
+  <!-- Zero-FOUC Theme Initialization (Daylight Limestone Mist default, respects explicit user toggle) -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("cairn-theme");
+        var t = saved === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (_) {}
+    })();
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Cairn — Intentional Viewing for YouTube",
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Chrome, Brave, Edge, Arc (Desktop Chromium)",
+          "softwareVersion": "1.2.2",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "description": "Manifest V3 Chrome extension that adds an Intention Gate, hides YouTube Shorts and algorithmic sidebars, highlights goal-matching tutorials locally, and provides a 1-to-8-hour Workday Lock with zero Cairn servers."
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Does Cairn send my YouTube watch history or typed intentions to any server?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "No. Cairn operates zero servers, zero analytics, and zero external API requests. Video titles and typed goals are evaluated locally inside your browser."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Why did I open this link on my phone from WhatsApp?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Cairn runs on desktop Chrome (macOS, Windows, Linux, ChromeOS). On mobile, tap 'Send Desktop Link to My WhatsApp' to drop the link into your own Message Yourself chat so you can open it in one click on WhatsApp Web on your laptop."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What happens if I need to end a Workday Lock early?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Workday Lock includes a deliberate break-glass confirmation ('end this lock early') plus an optional PIN. Ending a lock early still keeps Focus Mode ON so your YouTube home feed does not snap open by accident."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand-link" href="./" aria-label="Cairn home">
+        <svg
+          class="brand-lockup-svg"
+          viewBox="-3 -10.59 490.53 121.17"
+          role="img"
+          aria-hidden="true"
+        >
+          <g transform="translate(-18.984 -31.000) scale(0.63281)" fill="currentColor">
+            <rect x="76" y="37" width="88" height="50" rx="19" ry="19" transform="rotate(-2.5 120 62.0)"></rect>
+            <rect x="64" y="99" width="140" height="52" rx="20" ry="20" transform="rotate(1.5 134 125.0)"></rect>
+            <rect x="30" y="163" width="196" height="56" rx="21" ry="21"></rect>
+          </g>
+          <g transform="translate(140.03 0)" fill="currentColor" fill-rule="nonzero">
+            <path d="M92.26 20.02A51.00 51.00 0 1 0 92.26 79.98L80.93 71.75A37.00 37.00 0 1 1 80.93 28.25Z" transform="translate(4.00 0)"></path>
+            <path d="M0.00 66.00A34.75 34.75 0 1 1 69.50 66.00A34.75 34.75 0 1 1 0.00 66.00ZM14.00 66.00A20.75 20.75 0 1 0 55.50 66.00A20.75 20.75 0 1 0 14.00 66.00ZM55.50 39.00A7.00 7.00 0 0 1 69.50 39.00V93.00A7.00 7.00 0 0 1 55.50 93.00Z" transform="translate(113.00 0)"></path>
+            <path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM-0.50 14.00a7.50 7.50 0 1 0 15.00 0a7.50 7.50 0 1 0 -15.00 0Z" transform="translate(194.50 0)"></path>
+            <path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM7.00 58.00A26.00 26.00 0 0 1 33.00 32.00L33.00 46.00A12.00 12.00 0 0 0 21.00 58.00Z" transform="translate(221.50 0)"></path>
+            <path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM7.00 63.50A31.50 31.50 0 0 1 70.00 63.50L56.00 63.50A17.50 17.50 0 0 0 21.00 63.50ZM56.00 63.50V63.50H70.00V93.00A7.00 7.00 0 0 1 56.00 93.00Z" transform="translate(274.50 0)"></path>
+          </g>
+        </svg>
+        <span class="brand-tag">Chrome MV3 · v1.2.2</span>
+      </a>
+
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="#preview">Live Preview</a>
+        <a href="#walkthrough">22s Walkthrough</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#pricing">Free &amp; Pro</a>
+        <a href="#whatsapp">WhatsApp</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+
+      <div class="header-actions">
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          type="button"
+          aria-pressed="false"
+          aria-label="Toggle between Daylight Limestone Mist and Night Ridge dark theme"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          </svg>
+          <span id="theme-toggle-label">Daylight</span>
+        </button>
+        <a class="btn btn-primary btn-sm desktop-cta-only" data-cairn-install href="#get-cairn">
+          Add to Chrome
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- ── 1. HERO + ZERO-CLS INTERACTIVE YOUTUBE STAGE ──────────────────── -->
+    <section class="hero" id="preview">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">
+            <span class="eyebrow-dot" aria-hidden="true"></span>
+            Intentional YouTube · Zero Cairn Servers
+          </span>
+
+          <h1 class="hero-title">
+            Open YouTube for one thing. Leave when you're done.
+          </h1>
+
+          <p class="hero-lead">
+            YouTube's home feed, Shorts shelf, and "Up Next" rail are built to turn a 6-minute lookup into 45 minutes of drift. Cairn replaces the feed with your session goal, hides rabbit holes, and highlights tutorials that match why you came.
+          </p>
+
+          <div class="hero-origin">
+            <svg class="hero-origin-icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+              <rect x="76" y="37" width="88" height="50" rx="19" ry="19" transform="rotate(-2.5 120 62)"></rect>
+              <rect x="64" y="99" width="140" height="52" rx="20" ry="20" transform="rotate(1.5 134 125)"></rect>
+              <rect x="30" y="163" width="196" height="56" rx="21" ry="21"></rect>
+            </svg>
+            <span>
+              <strong>Why "Cairn"?</strong> On mountain trails, a cairn is a quiet stack of stones that keeps hikers on their path when fog rolls in—without blocking the mountain.
+            </span>
+          </div>
+
+          <div class="cta-cluster desktop-cta-only">
+            <a class="btn btn-primary" data-cairn-install href="#get-cairn">
+              Get Cairn for Chrome — $0
+            </a>
+            <a class="btn btn-whatsapp" href="#whatsapp">
+              WhatsApp Updates &amp; Share
+            </a>
+            <a class="btn btn-secondary" href="#walkthrough">
+              Watch 22s Demo
+            </a>
+          </div>
+
+          <!-- Phone / WhatsApp In-App Browser Handoff Card -->
+          <div class="mobile-handoff-box" aria-label="Save desktop extension link for your laptop">
+            <p class="mobile-handoff-note">
+              <strong>Viewing on your phone?</strong> Cairn installs on desktop Chrome. Send this link to your own WhatsApp <em>Message Yourself</em> chat so you can install it in one click on your laptop:
+            </p>
+            <div class="mobile-handoff-actions">
+              <a
+                class="btn btn-primary btn-sm"
+                data-wa-save
+                href="https://wa.me/?text=Save%20Cairn%20for%20my%20laptop%3A%20https%3A%2F%2Fmohdashraf010897.github.io%2Fcairn-public%2F"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Send Link to My WhatsApp
+              </a>
+              <button class="btn btn-secondary btn-sm" type="button" data-copy-link>
+                Copy Desktop Link
+              </button>
+              <a class="btn btn-secondary btn-sm" data-email-self href="mailto:?subject=Install%20Cairn%20on%20Chrome">
+                Email to Laptop
+              </a>
+            </div>
+            <div id="copy-toast" class="copy-toast" role="status" aria-live="polite"></div>
+          </div>
+
+          <ul class="trust-strip" aria-label="Key guarantees">
+            <li><span class="trust-check" aria-hidden="true">✓</span> Runs only on desktop youtube.com</li>
+            <li><span class="trust-check" aria-hidden="true">✓</span> 100% local rules — no account or telemetry</li>
+            <li><span class="trust-check" aria-hidden="true">✓</span> 1–8h Workday Lock for deep work</li>
+          </ul>
+        </div>
+
+        <!-- Interactive Zero-CLS Stage -->
+        <div class="stage-card" aria-label="Interactive Cairn YouTube preview">
+          <div class="stage-toolbar">
+            <div class="scenario-tablist" role="tablist" aria-label="Choose a real YouTube scenario">
+              <button
+                class="scenario-tab"
+                type="button"
+                role="tab"
+                id="tab-excel"
+                aria-selected="true"
+                aria-controls="stage-viewport"
+                tabindex="0"
+                data-scenario-tab="excel"
+              >
+                Excel pivots
+              </button>
+              <button
+                class="scenario-tab"
+                type="button"
+                role="tab"
+                id="tab-repair"
+                aria-selected="false"
+                aria-controls="stage-viewport"
+                tabindex="-1"
+                data-scenario-tab="repair"
+              >
+                Fix a faucet
+              </button>
+              <button
+                class="scenario-tab"
+                type="button"
+                role="tab"
+                id="tab-study"
+                aria-selected="false"
+                aria-controls="stage-viewport"
+                tabindex="-1"
+                data-scenario-tab="study"
+              >
+                Study audio
+              </button>
+              <button
+                class="scenario-tab"
+                type="button"
+                role="tab"
+                id="tab-lock"
+                aria-selected="false"
+                aria-controls="stage-viewport"
+                tabindex="-1"
+                data-scenario-tab="lock"
+              >
+                Workday Lock
+              </button>
+            </div>
+
+            <button
+              id="cairn-mode-switch"
+              class="mode-switch"
+              type="button"
+              aria-pressed="true"
+              aria-label="Toggle Cairn Focus Mode inside preview"
+            >
+              <span class="switch-pill" aria-hidden="true"></span>
+              <span id="cairn-mode-label">Cairn: ON</span>
+            </button>
+          </div>
+
+          <div class="browser-frame" id="stage-viewport">
+            <div class="browser-chrome">
+              <span class="window-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span class="browser-url" id="stage-browser-url">youtube.com/results?search_query=excel+pivot+tables</span>
+              <span class="cairn-toolbar-chip">Cairn</span>
+            </div>
+
+            <div class="stage-body grid-stack">
+              <!-- Scenario 1: Excel (ON) -->
+              <div class="stack-pane" data-stage-pane="excel-on" aria-hidden="false">
+                <div class="goal-banner">
+                  <span class="goal-banner-text">Session goal: Learn Excel pivot tables</span>
+                  <span class="goal-banner-meta">14m elapsed · Shorts hidden</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">Excel Pivot Tables in 12 Minutes — Clean Sample Dataset Walkthrough</p>
+                      <p class="feed-meta">Leila Gharani · 12:18 · Chapters included</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Matches goal</span>
+                  </div>
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">Grouping Dates &amp; Calculated Fields in Pivot Tables (Step-by-Step)</p>
+                      <p class="feed-meta">ExcelIsFun · 16:04 · Practical exercise</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Matches goal</span>
+                  </div>
+                  <div class="feed-row is-dimmed">
+                    <div>
+                      <p class="feed-title">My $300K Finance Desk Setup &amp; Morning Routine Vlog</p>
+                      <p class="feed-meta">Creator Lifestyle · 21:40</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">○ Off-goal</span>
+                  </div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Shorts shelf suppressed</span>
+                  <span>Up Next rail blurred</span>
+                  <span>Autoplay locked OFF</span>
+                </div>
+              </div>
+
+              <!-- Scenario 1: Excel (OFF) -->
+              <div class="stack-pane" data-stage-pane="excel-off" aria-hidden="true">
+                <div class="unfiltered-alert">
+                  <span>Unfiltered YouTube: Home feed &amp; Shorts shelf compete for your click</span>
+                  <span>No session anchor</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row">
+                    <div>
+                      <p class="feed-title">Excel Pivot Tables in 12 Minutes — Clean Sample Dataset Walkthrough</p>
+                      <p class="feed-meta">Buried between promoted feeds &amp; Shorts</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">Unranked</span>
+                  </div>
+                </div>
+                <div class="shorts-strip">
+                  <div class="short-tile">SHORT · "You won't believe this interview fail..."</div>
+                  <div class="short-tile">SHORT · "3 AM street food in Tokyo #shorts"</div>
+                  <div class="short-tile">SHORT · "Wait for the ending!! (4.2M views)"</div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Autoplay queues next video in 5s</span>
+                  <span>24 sidebar rabbit holes active</span>
+                </div>
+              </div>
+
+              <!-- Scenario 2: Faucet Repair (ON) -->
+              <div class="stack-pane" data-stage-pane="repair-on" aria-hidden="true">
+                <div class="goal-banner">
+                  <span class="goal-banner-text">Session goal: Replace dripping kitchen cartridge</span>
+                  <span class="goal-banner-meta">06m elapsed · Quick lookup</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">How to Replace a Single-Handle Kitchen Faucet Cartridge (Tools &amp; Steps)</p>
+                      <p class="feed-meta">This Old House · 07:42 · Direct instruction</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Matches goal</span>
+                  </div>
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">Identify Moen vs Delta Valve Stems Before Turning Water Back On</p>
+                      <p class="feed-meta">Everyday Plumbing · 05:15 · Reference guide</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Matches goal</span>
+                  </div>
+                  <div class="feed-row is-dimmed">
+                    <div>
+                      <p class="feed-title">Worst Contractor Disasters Caught on Camera (Compilation)</p>
+                      <p class="feed-meta">Home Drama · 19:50</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">○ Off-goal</span>
+                  </div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Comments collapsed by default</span>
+                  <span>End-screen cards hidden</span>
+                </div>
+              </div>
+
+              <!-- Scenario 2: Faucet Repair (OFF) -->
+              <div class="stack-pane" data-stage-pane="repair-off" aria-hidden="true">
+                <div class="unfiltered-alert">
+                  <span>Unfiltered YouTube: DIY compilation rabbit holes hijack a 7-minute repair</span>
+                  <span>Autoplay ON</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row">
+                    <div>
+                      <p class="feed-title">How to Replace a Single-Handle Kitchen Faucet Cartridge</p>
+                      <p class="feed-meta">Followed immediately by 18 renovation drama videos</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">Unranked</span>
+                  </div>
+                </div>
+                <div class="shorts-strip">
+                  <div class="short-tile">SHORT · "Plumber finds WHAT inside pipe?!"</div>
+                  <div class="short-tile">SHORT · "Satisfying pressure washing #shorts"</div>
+                  <div class="short-tile">SHORT · "Luxury kitchen tour ($250k)"</div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Comments &amp; arguments expanded</span>
+                  <span>End-screen cards cover final 20s</span>
+                </div>
+              </div>
+
+              <!-- Scenario 3: Study Audio (ON) -->
+              <div class="stack-pane" data-stage-pane="study-on" aria-hidden="true">
+                <div class="goal-banner">
+                  <span class="goal-banner-text">Session goal: Instrumental focus audio while writing</span>
+                  <span class="goal-banner-meta">Whitelisted channel · 45m nudge</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">2-Hour Acoustic Piano &amp; Rain — No Mid-Roll Interruptions</p>
+                      <p class="feed-meta">Whitelisted Study Channel · Playing cleanly</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Whitelisted</span>
+                  </div>
+                  <div class="feed-row is-dimmed">
+                    <div>
+                      <p class="feed-title">Watch-page sidebar &amp; live chat hidden so background audio stays in the background</p>
+                      <p class="feed-meta">Zero visual movement in peripheral vision</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">● Calm Watch</span>
+                  </div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Sidebar hidden</span>
+                  <span>Comments hidden</span>
+                  <span>Gentle check-in at 45m</span>
+                </div>
+              </div>
+
+              <!-- Scenario 3: Study Audio (OFF) -->
+              <div class="stack-pane" data-stage-pane="study-off" aria-hidden="true">
+                <div class="unfiltered-alert">
+                  <span>Unfiltered YouTube: Switching tabs flashes breaking news &amp; Shorts next to your audio</span>
+                  <span>Live chat scrolling</span>
+                </div>
+                <div class="shorts-strip">
+                  <div class="short-tile">SIDEBAR · "LIVE: Tech layoffs debate (14K watching)"</div>
+                  <div class="short-tile">SIDEBAR · "Top 10 sci-fi trailers this week"</div>
+                  <div class="short-tile">CHAT · 40 messages/sec scrolling beside player</div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Every tab switch invites a detour</span>
+                  <span>No session timer check-in</span>
+                </div>
+              </div>
+
+              <!-- Scenario 4: Workday Lock (ON) -->
+              <div class="stack-pane" data-stage-pane="lock-on" aria-hidden="true">
+                <div class="goal-banner">
+                  <span class="goal-banner-text">Workday Lock active · Focus Mode protected until 5:00 PM</span>
+                  <span class="goal-banner-meta">5h 42m remaining</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row is-matched">
+                    <div>
+                      <p class="feed-title">Impulse toggle intercepted before the feed loads</p>
+                      <p class="feed-meta">Turning Cairn off during a lock requires deliberate break-glass confirmation—and still keeps Focus Mode active if ended early.</p>
+                    </div>
+                    <span class="signal-badge signal-match">▲ Protected</span>
+                  </div>
+                  <div class="feed-row">
+                    <div>
+                      <p class="feed-title">Direct search still works whenever work requires a tutorial</p>
+                      <p class="feed-meta">Press "/" to search specific documentation or talks without unlocking the home feed.</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">● Tool, not cage</span>
+                  </div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Survives browser restart</span>
+                  <span>Optional SHA-256 Lock PIN</span>
+                </div>
+              </div>
+
+              <!-- Scenario 4: Workday Lock (OFF) -->
+              <div class="stack-pane" data-stage-pane="lock-off" aria-hidden="true">
+                <div class="unfiltered-alert">
+                  <span>Without Lock: One tired 3:15 PM click disables your blocker for the rest of the week</span>
+                  <span>Zero friction</span>
+                </div>
+                <div class="feed-list">
+                  <div class="feed-row">
+                    <div>
+                      <p class="feed-title">Most extensions fail at the exact moment willpower dips</p>
+                      <p class="feed-meta">A single toggle switch with no reflection pause turns off protection in 0.2 seconds—and stays forgotten.</p>
+                    </div>
+                    <span class="signal-badge signal-neutral">Unprotected</span>
+                  </div>
+                </div>
+                <div class="cleared-tray">
+                  <span>Toggle Cairn: ON above to compare Workday Lock</span>
+                  <span>1h · 2h · 4h · 8h presets</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. 22-SECOND SNAPPY PRODUCT WALKTHROUGH ───────────────────────── -->
+    <section class="section" id="walkthrough">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">22-Second Product Walkthrough</span>
+          <h2 class="section-title">See the entire YouTube flow—from Intention Gate to Workday Lock—in 22 seconds.</h2>
+          <p class="section-desc">
+            Real extension UI plates captured from Cairn v1.2: setting a SQL goal, clearing Shorts, dimming clickbait without red warning badges, and locking focus from the toolbar popup.
+          </p>
+        </div>
+
+        <div class="video-shell">
+          <div class="video-frame">
+            <video
+              id="cairn-walkthrough-video"
+              controls
+              playsinline
+              preload="metadata"
+              muted
+              loop
+              poster="./assets/demo/cairn-promo-poster-v2.png"
+            >
+              <source src="./assets/demo/cairn-promo-22s-snappy.webm" type="video/webm" />
+              <source src="./assets/demo/cairn-promo-22s-snappy.mp4" type="video/mp4" />
+              <track
+                kind="captions"
+                src="./assets/demo/cairn-promo-24s.vtt"
+                srclang="en"
+                label="English"
+                default
+              />
+              Your browser does not support embedded HTML5 video.
+            </video>
+          </div>
+          <div class="video-bar">
+            <p class="video-caption">
+              Muted by default so it never surprises you in an office or library. Captions included.
+            </p>
+            <div class="cta-cluster">
+              <button
+                id="video-sound-btn"
+                class="btn btn-secondary btn-sm"
+                type="button"
+                aria-pressed="false"
+              >
+                Unmute tactile sound
+              </button>
+              <a
+                class="btn btn-whatsapp btn-sm"
+                data-wa-share
+                href="https://wa.me/?text=Cairn%20for%20Chrome"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Share Demo on WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. HOW IT WORKS + INTERACTIVE IMPULSE CHECK SIMULATOR ─────────── -->
+    <section class="section" id="how-it-works">
+      <div class="container split-2">
+        <div>
+          <span class="eyebrow">Built on Behavioral Science, Not Guilt</span>
+          <h2 class="section-title">Three calm guardrails between your work and an accidental 40-minute detour.</h2>
+          <p class="section-desc" style="margin-bottom: 22px;">
+            Willpower-only blockers get uninstalled on busy afternoons. Cairn pairs structural feed removal with replacement search plans (Adriaanse et al., 2011) so YouTube stays useful as a library.
+          </p>
+
+          <ol class="step-list">
+            <li class="step-card">
+              <div class="step-num">01 · INTENTION GATE</div>
+              <h3>Start from search, not the algorithmic home feed</h3>
+              <p>
+                Opening <code>youtube.com</code> greets you with a calm prompt instead of 30 recommendations. Start typing immediately to jump straight to search results.
+              </p>
+            </li>
+            <li class="step-card">
+              <div class="step-num">02 · LOCAL SIGNAL SCORING</div>
+              <h3>Tutorials matching your goal stand out; noise recedes</h3>
+              <p>
+                Cairn reads video titles locally on your machine—marking goal matches with a clear <code>▲ Matches goal</code> badge while keeping off-goal items neutral grey so curiosity isn't baited.
+              </p>
+            </li>
+            <li class="step-card">
+              <div class="step-num">03 · PROPORTIONAL FRICTION &amp; SCHEDULE</div>
+              <h3>Pause muscle-memory clicks before Focus Mode drops</h3>
+              <p>
+                Pick Gentle Pause, a 10-second breathing countdown, automatic weekday Focus Hours, or a 1–8 hour Workday Lock.
+              </p>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Interactive Friction Simulator -->
+        <div class="sim-card" aria-label="Interactive Impulse Check simulator">
+          <span class="eyebrow">Try It Live · Impulse Check Simulator</span>
+          <h3 class="sim-heading">What happens when you try to turn Cairn off mid-session?</h3>
+          <p class="sim-lead">
+            Switch between Cairn's three real protection tiers below:
+          </p>
+
+          <div class="sim-tabs" role="tablist" aria-label="Friction protection tiers">
+            <button
+              class="scenario-tab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              tabindex="0"
+              data-sim-tab="gentle"
+            >
+              Level 1 · Gentle Pause
+            </button>
+            <button
+              class="scenario-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+              data-sim-tab="wait"
+            >
+              Level 2 · 10s Reflection
+            </button>
+            <button
+              class="scenario-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+              data-sim-tab="lock"
+            >
+              Workday Lock
+            </button>
+          </div>
+
+          <div class="grid-stack">
+            <!-- Gentle Pause -->
+            <div class="sim-panel stack-pane" data-sim-pane="gentle" aria-hidden="false">
+              <h3>Pause before turning off Focus Mode</h3>
+              <p>
+                Instead of scolding you, Cairn reminds you of your active goal (<em>"Learn Excel pivot tables · 14m"</em>) and offers a direct search box so you can look up one video without opening the home feed.
+              </p>
+              <label class="sr-only" for="sim-search-input">Search for a specific topic instead</label>
+              <div class="sim-input-row">
+                <input
+                  id="sim-search-input"
+                  class="sim-input"
+                  type="text"
+                  placeholder="e.g., SQL window functions"
+                  autocomplete="off"
+                />
+                <button id="sim-search-btn" class="btn btn-primary btn-sm" type="button">
+                  Search &amp; Keep Focus ON
+                </button>
+              </div>
+              <div id="sim-level1-feedback" class="sim-feedback" role="status" aria-live="polite"></div>
+            </div>
+
+            <!-- 10s Reflection -->
+            <div class="sim-panel stack-pane" data-sim-pane="wait" aria-hidden="true">
+              <h3>10-second breathing buffer</h3>
+              <p>
+                Most distraction detours happen in the first two seconds of boredom. Level 2 holds the "Turn Off" button briefly while showing your observed YouTube time today—no fake annual projections.
+              </p>
+              <button id="sim-start-wait" class="btn btn-primary btn-sm" type="button">
+                Simulate Reflection Countdown
+              </button>
+              <div id="sim-level2-feedback" class="sim-feedback" role="status" aria-live="polite"></div>
+            </div>
+
+            <!-- Workday Lock -->
+            <div class="sim-panel stack-pane" data-sim-pane="lock" aria-hidden="true">
+              <h3>Workday Lock break-glass check</h3>
+              <p>
+                Locked for 4 hours? Even if an emergency requires ending the lock early, typing the exact confirmation phrase only lifts the lock—<strong>Focus Mode stays ON</strong> until you consciously toggle again.
+              </p>
+              <label class="sr-only" for="sim-lock-input">Type end this lock early to test break-glass behavior</label>
+              <div class="sim-input-row">
+                <input
+                  id="sim-lock-input"
+                  class="sim-input"
+                  type="text"
+                  placeholder='Type "end this lock early"'
+                  autocomplete="off"
+                />
+                <button id="sim-lock-btn" class="btn btn-primary btn-sm" type="button">
+                  Test Phrase
+                </button>
+              </div>
+              <div id="sim-lock-feedback" class="sim-feedback" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 4. FREE FOREVER + CHROME AI PRO PULSE + WHATSAPP REACHABILITY ─── -->
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">Transparent Roadmap &amp; Direct Reachability</span>
+          <h2 class="section-title">Free core forever. Native Chrome AI on the horizon. Direct reachability on WhatsApp.</h2>
+          <p class="section-desc">
+            Every focus control in Cairn today is free with zero paywalls. Help shape what we build next—and follow release drops without algorithms in the way.
+          </p>
+        </div>
+
+        <div class="cards-3">
+          <!-- Card 1: Cairn Core ($0) -->
+          <article class="tier-card is-featured" aria-label="Cairn Free Core">
+            <div>
+              <span class="eyebrow">Shipped Today · v1.2.2</span>
+              <div class="tier-price">$0 <span class="tier-unit">forever</span></div>
+              <p class="tier-sub">Every distraction blocker &amp; commitment tool included.</p>
+              <ul class="feature-list">
+                <li><span class="trust-check" aria-hidden="true">✓</span> Hide Home Feed, Shorts, Sidebar, Comments &amp; End Screens</li>
+                <li><span class="trust-check" aria-hidden="true">✓</span> Intention Gate + local Goal-Match badges</li>
+                <li><span class="trust-check" aria-hidden="true">✓</span> 4 quick presets (Minimal, Balanced, Deep Focus, Custom)</li>
+                <li><span class="trust-check" aria-hidden="true">✓</span> 1–8h Workday Lock, PIN &amp; Weekday Focus Schedule</li>
+                <li><span class="trust-check" aria-hidden="true">✓</span> Observed 7-day local summary &amp; JSON settings backup</li>
+              </ul>
+            </div>
+            <a class="btn btn-primary" data-cairn-install href="#get-cairn">
+              Get Cairn Free
+            </a>
+          </article>
+
+          <!-- Card 2: Chrome Built-in AI Pro Exploration -->
+          <article class="tier-card" aria-label="Cairn Pro On-Device Chrome AI Exploration">
+            <div>
+              <span class="eyebrow">Exploring Next · On-Device Chrome AI</span>
+              <h3 class="tier-headline">Before You Click</h3>
+              <p class="tier-sub">Instant local summaries via Chrome's built-in on-device AI APIs.</p>
+              <ul class="feature-list">
+                <li><span class="trust-check" aria-hidden="true">◆</span><span>Hover a 40-minute video to see its real takeaways before clicking</span></li>
+                <li><span class="trust-check" aria-hidden="true">◆</span><span>Runs on Chrome's local Gemini Nano / Summarizer APIs—0 cloud transcripts sent to Cairn</span></li>
+                <li><span class="trust-check" aria-hidden="true">◆</span><span>Semantic goal matching beyond title keywords</span></li>
+              </ul>
+              <p class="pulse-question">
+                Would you use on-device Chrome AI previews?
+              </p>
+            </div>
+            <div>
+              <div class="pulse-actions">
+                <button id="pulse-yes" class="btn btn-secondary btn-sm" type="button">
+                  Yes, build local AI previews
+                </button>
+                <button id="pulse-free" class="btn btn-secondary btn-sm" type="button">
+                  Free blocker is enough
+                </button>
+              </div>
+              <div id="pulse-result" class="pulse-result" hidden role="status" aria-live="polite">
+                <span id="pulse-result-text"></span>
+                <div style="margin-top: 6px;">
+                  <a
+                    id="pulse-github-link"
+                    href="https://github.com/mohdashraf010897/cairn-public/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Log my +1 on GitHub Issues &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3: WhatsApp-First Reachability -->
+          <article class="tier-card" id="whatsapp" aria-label="WhatsApp updates and community feedback">
+            <div>
+              <span class="eyebrow">Reach Us Directly · WhatsApp First</span>
+              <h3 class="tier-headline">Stay on the Trail</h3>
+              <p class="tier-sub" id="wa-channel-note">
+                No mailing-list spam or tracking pixels. Save Cairn to WhatsApp or share the 22s walkthrough with your team.
+              </p>
+              <ul class="feature-list">
+                <li><span class="trust-check" aria-hidden="true">✓</span><span>One-tap save to your WhatsApp <em>Message Yourself</em> chat for desktop install</span></li>
+                <li><span class="trust-check" aria-hidden="true">✓</span><span>WhatsApp Channel slot ready for Chrome Web Store &amp; Chrome AI launch drops</span></li>
+                <li><span class="trust-check" aria-hidden="true">✓</span><span>Direct public bug &amp; feature tracker on GitHub</span></li>
+              </ul>
+            </div>
+            <div style="display: grid; gap: 9px;">
+              <a
+                id="wa-channel-btn"
+                class="btn btn-whatsapp btn-sm"
+                href="https://wa.me/?text=Save%20Cairn%20for%20my%20laptop%3A%20https%3A%2F%2Fmohdashraf010897.github.io%2Fcairn-public%2F"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Save Link to My WhatsApp
+              </a>
+              <a
+                class="btn btn-secondary btn-sm"
+                data-wa-share
+                href="https://wa.me/?text=Using%20Cairn%20on%20Chrome"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Share Cairn with a Friend on WhatsApp
+              </a>
+              <a
+                class="btn btn-secondary btn-sm"
+                data-cairn-issues
+                href="https://github.com/mohdashraf010897/cairn-public/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Report a Bug or Request a Feature
+              </a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. GET CAIRN ON CHROME (STORE + DEVELOPER PREVIEW) ────────────── -->
+    <section class="section" id="get-cairn">
+      <div class="container">
+        <div class="install-banner">
+          <div>
+            <span class="eyebrow" id="cws-status-text">Chrome Extension · v1.2.2 Release Candidate</span>
+            <h2 class="section-title" style="margin-top: 10px;">Install Cairn on Desktop Chrome, Brave, Arc, or Edge.</h2>
+            <p class="section-desc">
+              Cairn is a lightweight Manifest V3 package (~75 KB, zero third-party runtime dependencies). Once Chrome Web Store review completes, every install button on this page opens one-click install directly.
+            </p>
+            <ol class="install-steps">
+              <li><strong>On mobile right now?</strong> Tap <em>Send Link to My WhatsApp</em> so it waits in WhatsApp Web on your computer.</li>
+              <li><strong>Want release ping or early build help?</strong> Open a note on <a data-cairn-issues href="https://github.com/mohdashraf010897/cairn-public/issues" target="_blank" rel="noopener noreferrer">Cairn Public Issues</a>.</li>
+              <li><strong>Already installed Cairn?</strong> Click the green stacked-stone Cairn icon in your Chrome toolbar on any YouTube tab.</li>
+            </ol>
+          </div>
+          <div style="display: grid; gap: 10px;">
+            <a
+              class="btn btn-primary"
+              data-wa-save
+              href="https://wa.me/?text=Save%20Cairn%20for%20my%20laptop%3A%20https%3A%2F%2Fmohdashraf010897.github.io%2Fcairn-public%2F"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Send Desktop Link to My WhatsApp
+            </a>
+            <button class="btn btn-secondary" type="button" data-copy-link>
+              Copy Page Link for Chrome
+            </button>
+            <a
+              class="btn btn-secondary"
+              href="https://github.com/mohdashraf010897/cairn-public"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Public Docs &amp; Changelog
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 6. VERIFIABLE PRIVACY TABLE & FAQ ─────────────────────────────── -->
+    <section class="section" id="privacy">
+      <div class="container">
+        <div class="section-header">
+          <span class="eyebrow">Verifiable Privacy Architecture</span>
+          <h2 class="section-title">What happens on YouTube stays inside your browser.</h2>
+          <p class="section-desc">
+            Inspect Cairn in Chrome DevTools &rarr; Network at any time: Cairn initiates zero requests to Cairn or third-party servers, operating purely locally on <code>youtube.com</code>. Read the full <a href="./privacy/">Privacy Policy</a>.
+          </p>
+        </div>
+
+        <div class="table-wrap" style="margin-bottom: 40px;">
+          <table class="truth-table">
+            <thead>
+              <tr>
+                <th scope="col">What Data Exists</th>
+                <th scope="col">Where It Lives</th>
+                <th scope="col">Leaves Your Device?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Typed session intentions &amp; 7-day viewing stats</strong></td>
+                <td><code>chrome.storage.local</code> on your computer</td>
+                <td><strong>Never.</strong> Stays strictly on this device and clears automatically when Cairn is removed (synced preferences reset anytime in Settings).</td>
+              </tr>
+              <tr>
+                <td><strong>Video title &amp; channel quality scoring</strong></td>
+                <td>Evaluated locally on <code>youtube.com</code> (cached in <code>chrome.storage.local</code>)</td>
+                <td><strong>Never.</strong> Deterministic local rules—zero external AI or analytics endpoints.</td>
+              </tr>
+              <tr>
+                <td><strong>Focus preferences, schedule &amp; optional SHA-256 Lock PIN hash</strong></td>
+                <td><code>chrome.storage.sync</code></td>
+                <td><strong>No Cairn servers.</strong> Syncs across your signed-in Chrome browsers only if you enable Google Chrome Sync.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="faq-list" aria-label="Frequently asked questions">
+          <details class="faq-item">
+            <summary>Does Cairn block YouTube completely or break embedded tutorial videos on other sites?</summary>
+            <div class="faq-body">
+              Neither. Cairn runs only on desktop <code>youtube.com</code> pages—embedded docs videos on Notion, Coursera, or internal wikis are untouched, and YouTube Search stays completely accessible whenever you need a tutorial.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>Why are off-goal or clickbait videos marked with a quiet grey badge instead of bright red?</summary>
+            <div class="faq-body">
+              Bright red warning badges act like neon signs—psychologically triggering curiosity ("forbidden-fruit effect"). Cairn highlights goal matches in calm Alpine Pine (<code>▲ Matches goal</code>) and lets low-signal items fade quietly into the background.
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary>Does Cairn work on Brave, Microsoft Edge, or Arc?</summary>
+            <div class="faq-body">
+              Yes. Any desktop Chromium browser that supports Manifest V3 Chrome extensions runs Cairn with identical local storage and zero-server guarantees.
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong style="color: var(--ink);">Cairn</strong> — Mark the path. Then walk it.
+        <div class="footer-tagline">
+          Built for intentional viewing on desktop Chromium · Zero servers, zero telemetry.
+        </div>
+      </div>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="./privacy/">Privacy Policy</a>
+        <a href="./support/">Support</a>
+        <a href="#whatsapp">WhatsApp</a>
+        <a
+          data-cairn-issues
+          href="https://github.com/mohdashraf010897/cairn-public/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub Issues
+        </a>
+        <a href="./fonts/OFL-LICENSES.md">Font Licenses</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="./scripts/cairn-links.js"></script>
+  <script src="./scripts/cairn-site.js"></script>
+</body>
+</html>

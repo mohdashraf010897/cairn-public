@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cairn horizontal lockup.
+
+  Mark ink height = 1.15 x cap height. Mark and wordmark share an
+  optical centre line. Gap = 20 units = 0.20 x cap height measured
+  from the mark bounding box. That reads as ~0.45 x cap optically,
+  because the mark is a pyramid and is narrow at cap height.
+  Do not re-space.
+
+  The viewBox is trimmed to the ink box on all four sides, so the
+  lockup positions by its bounds with no phantom padding. Apply
+  clear space externally: minimum 0.5 x cap height on every side.
+
+  The wordmark is outlined paths, not <text>. No font file, and it
+  renders identically everywhere. Letterforms are built from circles
+  and 14-unit stems on a 100-unit cap / 68-unit x-height grid; round
+  forms overshoot 0.75-1 unit.
+
+  Minimum reproduction width: 96px. Below that use the mark alone.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-3.00 -10.59 490.53 121.17"
+     role="img" aria-label="Cairn">
+  <title>Cairn</title>
+  <g transform="translate(-18.984 -31.000) scale(0.63281)">
+    <rect x="76" y="37" width="88" height="50" rx="19" ry="19" fill="#0B6250" transform="rotate(-2.5 120 62.0)"/>
+    <rect x="64" y="99" width="140" height="52" rx="20" ry="20" fill="#0B6250" transform="rotate(1.5 134 125.0)"/>
+    <rect x="30" y="163" width="196" height="56" rx="21" ry="21" fill="#0B6250"/>
+  </g>
+  <g transform="translate(140.03 0)" fill="#0B6250" fill-rule="nonzero"><path d="M92.26 20.02A51.00 51.00 0 1 0 92.26 79.98L80.93 71.75A37.00 37.00 0 1 1 80.93 28.25Z" transform="translate(4.00 0)"/><path d="M0.00 66.00A34.75 34.75 0 1 1 69.50 66.00A34.75 34.75 0 1 1 0.00 66.00ZM14.00 66.00A20.75 20.75 0 1 0 55.50 66.00A20.75 20.75 0 1 0 14.00 66.00ZM55.50 39.00A7.00 7.00 0 0 1 69.50 39.00V93.00A7.00 7.00 0 0 1 55.50 93.00Z" transform="translate(113.00 0)"/><path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM-0.50 14.00a7.50 7.50 0 1 0 15.00 0a7.50 7.50 0 1 0 -15.00 0Z" transform="translate(194.50 0)"/><path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM7.00 58.00A26.00 26.00 0 0 1 33.00 32.00L33.00 46.00A12.00 12.00 0 0 0 21.00 58.00Z" transform="translate(221.50 0)"/><path d="M0.00 39.00A7.00 7.00 0 0 1 14.00 39.00V93.00A7.00 7.00 0 0 1 0.00 93.00ZM7.00 63.50A31.50 31.50 0 0 1 70.00 63.50L56.00 63.50A17.50 17.50 0 0 0 21.00 63.50ZM56.00 63.50V63.50H70.00V93.00A7.00 7.00 0 0 1 56.00 93.00Z" transform="translate(274.50 0)"/></g>
+</svg>

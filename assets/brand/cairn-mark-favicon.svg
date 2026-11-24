@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cairn favicon-grade mark. 16-unit grid, integer pixel edges.
+
+    stone   x   y    w    h    r
+    top     5   2    6    3    0.5
+    mid     3   6   10    3    0.5
+    base    2  10   12    4    1
+
+  Corner radius is 0.5 on the 3px tiers: enough to soften the
+  corner, not enough to eat the bar. rx 1 (tried first) rounded a
+  3px bar into a stadium and dropped apparent density by ~15%.
+
+  Seams are a full 1px of background. Fill is 100% opaque with
+  antialiasing only on the four corners of each stone.
+
+  Deliberately SYMMETRIC — the lean in cairn-mark.svg is invisible
+  below 32px and costs a pixel of definition. Use this file at
+  16 and 32px; use cairn-mark.svg at 48px and above.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"
+     role="img" aria-label="Cairn">
+  <title>Cairn</title>
+  <rect x="5" y="2" width="6" height="3" rx="0.5" ry="0.5" fill="#0B6250"/>
+  <rect x="3" y="6" width="10" height="3" rx="0.5" ry="0.5" fill="#0B6250"/>
+  <rect x="2" y="10" width="12" height="4" rx="1" ry="1" fill="#0B6250"/>
+</svg>

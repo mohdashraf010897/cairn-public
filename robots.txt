@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mohdashraf010897.github.io/cairn-public/sitemap.xml
