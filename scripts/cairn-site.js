@@ -1,18 +1,102 @@
 /* ==========================================================================
-   Cairn Public Site — Interactive Trailhead Controls
-   Zero external requests · Accessible roving tabindex · Zero-CLS state swaps
+   Cairn Public Site — Interactive Trailhead Controls & 1-Click Pulse Capture
+   Direct Chrome Web Store links · Accessible roving tabindex · Zero-CLS swaps
    ========================================================================== */
 (function () {
   "use strict";
 
   var links = window.CAIRN_LINKS || {};
   var siteUrl = links.siteUrl || window.location.href.split("#")[0];
-  var storeUrl = (links.chromeWebStoreUrl || "").trim();
+  var storeUrl = (
+    links.chromeWebStoreUrl ||
+    "https://chromewebstore.google.com/detail/cairn-%E2%80%94-intentional-viewi/faebackbnaagohmbebibnancofpgadfm"
+  ).trim();
   var whatsappChannelUrl = (links.whatsappChannelUrl || "").trim();
   var issuesUrl = links.githubIssuesUrl || "https://github.com/mohdashraf010897/cairn-public/issues";
-  var featurePulseUrl =
-    links.githubFeaturePulseUrl ||
-    "https://github.com/mohdashraf010897/cairn-public/issues/new";
+
+  /* First-party Cloudflare D1 Worker (disabled on localhost unless explicitly overridden for tests) */
+  var pulseBase = String(
+    window.CAIRN_PULSE_API_OVERRIDE || links.pulseApiBaseUrl || ""
+  ).replace(/\/+$/, "");
+  var isLocalHost =
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname === "localhost" ||
+    window.location.protocol === "file:";
+  var canCallPulseApi =
+    Boolean(pulseBase) && (!isLocalHost || Boolean(window.CAIRN_PULSE_API_OVERRIDE));
+
+  function detectRefSource() {
+    try {
+      var params = new URLSearchParams(window.location.search || "");
+      var utm = params.get("utm_source") || params.get("ref") || params.get("source");
+      if (utm) return utm.slice(0, 64);
+      if (document.referrer) {
+        var refHost = new URL(document.referrer).hostname.replace(/^www\./, "");
+        if (refHost && refHost !== window.location.hostname) {
+          return refHost.slice(0, 64);
+        }
+      }
+    } catch (_) {}
+    return "direct";
+  }
+
+  var refSource = detectRefSource();
+
+  function getDeviceKind() {
+    var ua = navigator.userAgent || "";
+    return /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(ua) ? "mobile" : "desktop";
+  }
+
+  function trackFunnel(eventType, buttonSlot) {
+    if (!canCallPulseApi) return;
+    var payload = JSON.stringify({
+      event_type: eventType,
+      button_slot: buttonSlot || "unknown",
+      ref_source: refSource,
+      device_kind: getDeviceKind()
+    });
+    var endpoint = pulseBase + "/api/funnel";
+    try {
+      if (navigator.sendBeacon) {
+        var sent = navigator.sendBeacon(endpoint, payload);
+        if (sent) return;
+      }
+    } catch (_) {}
+    try {
+      fetch(endpoint, {
+        method: "POST",
+        body: payload,
+        keepalive: true
+      }).catch(function () {});
+    } catch (_) {}
+  }
+
+  /* Record one aggregate landing page view per browser tab session */
+  if (canCallPulseApi && document.getElementById("preview")) {
+    try {
+      if (!sessionStorage.getItem("cairn-pv-v1")) {
+        sessionStorage.setItem("cairn-pv-v1", "1");
+        trackFunnel("page_view", "landing");
+      }
+    } catch (_) {
+      trackFunnel("page_view", "landing");
+    }
+  }
+
+  function buildStoreUrl(slot) {
+    if (!storeUrl) return "#get-cairn";
+    try {
+      var u = new URL(storeUrl);
+      u.searchParams.set("utm_source", "cairn-site");
+      if (slot) u.searchParams.set("utm_medium", slot);
+      if (refSource && refSource !== "direct") {
+        u.searchParams.set("utm_campaign", refSource);
+      }
+      return u.toString();
+    } catch (_) {
+      return storeUrl;
+    }
+  }
 
   /* ── 1. Theme Toggle (Limestone Mist <-> Night Ridge) ─────────────────── */
   var root = document.documentElement;
@@ -46,7 +130,7 @@
     });
   }
 
-  /* ── 2. Device-Smart Install & WhatsApp Links ─────────────────────────── */
+  /* ── 2. Direct Chrome Web Store & WhatsApp Store Links ────────────────── */
   var ua = navigator.userAgent || "";
   var isMobileUa = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(ua);
   var narrowMq = window.matchMedia ? window.matchMedia("(max-width: 720px)") : null;
@@ -60,41 +144,66 @@
     narrowMq.addEventListener("change", refreshMobileClass);
   }
 
-  /* Wire primary install anchors: direct CWS when live, #get-cairn section before CWS */
-  var installLinks = document.querySelectorAll("[data-cairn-install]");
-  installLinks.forEach(function (el) {
+  /* Wire every install CTA straight to the live Chrome Web Store listing */
+  document.querySelectorAll("[data-cairn-install]").forEach(function (el) {
+    var slot = el.getAttribute("data-cairn-install") || "cta";
     if (storeUrl) {
-      el.setAttribute("href", storeUrl);
+      el.setAttribute("href", buildStoreUrl(slot));
       el.setAttribute("target", "_blank");
       el.setAttribute("rel", "noopener noreferrer");
-    } else {
-      el.setAttribute("href", "#get-cairn");
     }
+    el.addEventListener("click", function () {
+      trackFunnel("cws_click", slot);
+    });
   });
 
   var cwsStatusBadge = document.getElementById("cws-status-text");
   if (cwsStatusBadge && storeUrl) {
-    cwsStatusBadge.textContent = "Live on the Chrome Web Store — installs in one click.";
+    cwsStatusBadge.textContent = "Live on the Chrome Web Store · v1.2.2";
   }
 
-  /* Wire WhatsApp save-to-self & share links */
+  /* Wire WhatsApp save-to-self & share links with the direct Chrome Web Store URL */
   var saveMsg =
     links.whatsappDesktopSaveText ||
-    "Save Cairn for my laptop (intentional YouTube Chrome extension): " + siteUrl;
+    "Install Cairn on desktop Chrome (intentional YouTube — hides Shorts & rabbit holes, 100% local): " +
+      storeUrl;
   var shareMsg =
     links.whatsappShareText ||
-    "Cairn for Chrome — open YouTube for one thing and leave when done: " + siteUrl;
+    "Using Cairn on Chrome to open YouTube for one thing and leave when done: " + storeUrl;
+  var demoShareMsg =
+    links.whatsappDemoShareText ||
+    "22-sec demo of Cairn for Chrome — install free: " +
+      storeUrl +
+      "\nWatch 22s walkthrough: " +
+      siteUrl +
+      "#walkthrough";
 
   document.querySelectorAll("[data-wa-save]").forEach(function (el) {
+    var slot = el.getAttribute("data-wa-save") || "wa_save";
     el.setAttribute("href", "https://wa.me/?text=" + encodeURIComponent(saveMsg));
+    el.addEventListener("click", function () {
+      trackFunnel("wa_save_self", slot);
+    });
   });
 
   document.querySelectorAll("[data-wa-share]").forEach(function (el) {
+    var slot = el.getAttribute("data-wa-share") || "wa_share";
     el.setAttribute("href", "https://wa.me/?text=" + encodeURIComponent(shareMsg));
+    el.addEventListener("click", function () {
+      trackFunnel("wa_share_friend", slot);
+    });
+  });
+
+  document.querySelectorAll("[data-wa-share-demo]").forEach(function (el) {
+    var slot = el.getAttribute("data-wa-share-demo") || "wa_demo";
+    el.setAttribute("href", "https://wa.me/?text=" + encodeURIComponent(demoShareMsg));
+    el.addEventListener("click", function () {
+      trackFunnel("wa_share_demo", slot);
+    });
   });
 
   document.querySelectorAll("[data-email-self]").forEach(function (el) {
-    var subj = "Install Cairn on Chrome (Desktop link)";
+    var subj = "Install Cairn on Chrome (Direct Chrome Web Store link)";
     var body =
       "Open this on your laptop in Chrome to install Cairn (Intentional Viewing for YouTube):\n\n" +
       (storeUrl || siteUrl);
@@ -104,29 +213,24 @@
     );
   });
 
-  /* Official WhatsApp Channel button: live channel when configured, honest fallback before */
+  /* Optional Official WhatsApp Broadcast Channel button (unhides automatically when URL is set) */
   var channelBtn = document.getElementById("wa-channel-btn");
-  var channelNote = document.getElementById("wa-channel-note");
   if (channelBtn) {
     if (whatsappChannelUrl) {
+      channelBtn.hidden = false;
       channelBtn.setAttribute("href", whatsappChannelUrl);
-      channelBtn.textContent = "Follow Cairn on WhatsApp Channel";
-      if (channelNote) {
-        channelNote.textContent = "Quiet release notes only — new versions and Chrome Web Store drop.";
-      }
+      channelBtn.addEventListener("click", function () {
+        trackFunnel("wa_channel_click", "whatsapp_card");
+      });
     } else {
-      channelBtn.setAttribute("href", "https://wa.me/?text=" + encodeURIComponent(saveMsg));
-      channelBtn.textContent = "Save Link to My WhatsApp";
-      if (channelNote) {
-        channelNote.textContent =
-          "Official WhatsApp broadcast channel opens at Chrome Web Store launch — save Cairn to your 'Message Yourself' chat today or share the 22s walkthrough.";
-      }
+      channelBtn.hidden = true;
     }
   }
 
-  /* Copy link buttons with inline feedback + polite live toast + clipboard error safety */
+  /* Copy Chrome Web Store link buttons */
   var copyToast = document.getElementById("copy-toast");
   document.querySelectorAll("[data-copy-link]").forEach(function (btn) {
+    var slot = btn.getAttribute("data-copy-link") || "copy";
     var defaultLabel = btn.textContent.trim();
     var resetTimer = null;
     function announceCopy(buttonLabel, toastMessage) {
@@ -144,26 +248,27 @@
 
     btn.addEventListener("click", function () {
       var targetUrl = storeUrl || siteUrl;
+      trackFunnel("copy_store_link", slot);
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard
           .writeText(targetUrl)
           .then(function () {
-            announceCopy("Copied Desktop Link ✓", "Copied desktop link: " + targetUrl);
+            announceCopy("Copied Store Link ✓", "Copied Chrome Web Store link!");
           })
           .catch(function () {
-            window.prompt("Copy Cairn desktop link:", targetUrl);
-            announceCopy("Link Shown to Copy", "Desktop link: " + targetUrl);
+            window.prompt("Copy Cairn Chrome Web Store link:", targetUrl);
+            announceCopy("Store Link Shown", "Chrome Web Store link: " + targetUrl);
           });
       } else {
-        window.prompt("Copy Cairn desktop link:", targetUrl);
-        announceCopy("Link Shown to Copy", "Desktop link: " + targetUrl);
+        window.prompt("Copy Cairn Chrome Web Store link:", targetUrl);
+        announceCopy("Store Link Shown", "Chrome Web Store link: " + targetUrl);
       }
     });
   });
 
   /* ── 3. Interactive Zero-CLS Hero Stage (4 Scenarios x Cairn ON/OFF) ──── */
   var scenarioTabs = Array.prototype.slice.call(
-    document.querySelectorAll('[data-scenario-tab]')
+    document.querySelectorAll("[data-scenario-tab]")
   );
   var modeSwitch = document.getElementById("cairn-mode-switch");
   var modeSwitchText = document.getElementById("cairn-mode-label");
@@ -237,13 +342,14 @@
   if (promoVideo && muteToggle) {
     muteToggle.addEventListener("click", function () {
       promoVideo.muted = !promoVideo.muted;
-      if (!promoVideo.muted && promoVideo.paused) {
-        promoVideo.play().catch(function () {});
+      if (!promoVideo.muted) {
+        trackFunnel("video_unmute", "walkthrough");
+        if (promoVideo.paused) {
+          promoVideo.play().catch(function () {});
+        }
       }
       muteToggle.setAttribute("aria-pressed", promoVideo.muted ? "false" : "true");
-      muteToggle.textContent = promoVideo.muted
-        ? "Unmute tactile sound"
-        : "Mute sound";
+      muteToggle.textContent = promoVideo.muted ? "Unmute tactile sound" : "Mute sound";
     });
   }
 
@@ -284,7 +390,6 @@
     });
   });
 
-  /* Level 1 replacement search demo */
   var simSearchBtn = document.getElementById("sim-search-btn");
   var simSearchInput = document.getElementById("sim-search-input");
   var simLevel1Msg = document.getElementById("sim-level1-feedback");
@@ -296,14 +401,14 @@
     });
   }
 
-  /* Level 2 10-second reflection timer */
   var simStartWait = document.getElementById("sim-start-wait");
   var simLevel2Msg = document.getElementById("sim-level2-feedback");
   if (simStartWait && simLevel2Msg) {
     simStartWait.addEventListener("click", function () {
       if (countdownTimer) clearInterval(countdownTimer);
       var left = 5;
-      simLevel2Msg.textContent = "Breathing pause: " + left + "s remaining before Turn Off unlocks...";
+      simLevel2Msg.textContent =
+        "Breathing pause: " + left + "s remaining before Turn Off unlocks...";
       countdownTimer = setInterval(function () {
         left -= 1;
         if (left > 0) {
@@ -319,7 +424,6 @@
     });
   }
 
-  /* Workday Lock break-glass phrase verifier */
   var lockInput = document.getElementById("sim-lock-input");
   var lockBtn = document.getElementById("sim-lock-btn");
   var lockMsg = document.getElementById("sim-lock-feedback");
@@ -336,54 +440,240 @@
     });
   }
 
-  /* ── 6. Chrome Built-in AI ("Before You Click") Pro Demand Pulse ──────── */
+  /* ── 6. 1-Click Chrome Built-in AI Pulse (Cloudflare D1, Zero Extra Hop) ─ */
   var pulseYes = document.getElementById("pulse-yes");
   var pulseFree = document.getElementById("pulse-free");
-  var pulseResult = document.getElementById("pulse-result");
-  var pulseResultText = document.getElementById("pulse-result-text");
-  var pulseGithubLink = document.getElementById("pulse-github-link");
+  var pulseYesCount = document.getElementById("pulse-yes-count");
+  var pulseFreeCount = document.getElementById("pulse-free-count");
+  var pulseNoteForm = document.getElementById("pulse-note-form");
+  var pulseNoteInput = document.getElementById("pulse-note-input");
+  var pulseFeedback = document.getElementById("pulse-feedback");
 
-  function showPulseChoice(choice) {
-    if (!pulseResult || !pulseResultText) return;
-    pulseResult.hidden = false;
-    if (choice === "yes") {
-      pulseResultText.textContent =
-        "Noted locally on this browser: you want on-device Chrome AI video previews. Want us to count your vote publicly?";
-      if (pulseGithubLink) {
-        pulseGithubLink.hidden = false;
-        pulseGithubLink.setAttribute("href", featurePulseUrl);
-      }
-    } else {
-      pulseResultText.textContent =
-        "Got it — Cairn's core blocker, Intention Gate, and Workday Lock stay $0 and local forever.";
-      if (pulseGithubLink) {
-        pulseGithubLink.hidden = true;
-      }
+  function getOrCreateVoterId() {
+    var key = "cairn-pulse-voter-v1";
+    try {
+      var existing = localStorage.getItem(key);
+      if (existing && existing.length >= 8) return existing;
+      var created =
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : "cairn-" + Math.random().toString(36).slice(2) + "-" + Date.now().toString(36);
+      localStorage.setItem(key, created);
+      return created;
+    } catch (_) {
+      return "anon-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
   }
 
-  try {
-    var savedPulse = localStorage.getItem("cairn-pro-pulse");
-    if (savedPulse === "yes" || savedPulse === "free") {
-      showPulseChoice(savedPulse);
-    }
-  } catch (_) {}
+  var selectedPulseChoice = null;
 
-  if (pulseYes) {
-    pulseYes.addEventListener("click", function () {
-      try {
-        localStorage.setItem("cairn-pro-pulse", "yes");
-      } catch (_) {}
-      showPulseChoice("yes");
-    });
+  function renderPulseSelection(choice) {
+    selectedPulseChoice = choice;
+    if (pulseYes) {
+      var isYes = choice === "yes";
+      pulseYes.classList.toggle("is-selected", isYes);
+      pulseYes.setAttribute("aria-pressed", isYes ? "true" : "false");
+    }
+    if (pulseFree) {
+      var isNo = choice === "no";
+      pulseFree.classList.toggle("is-selected", isNo);
+      pulseFree.setAttribute("aria-pressed", isNo ? "true" : "false");
+    }
   }
 
-  if (pulseFree) {
-    pulseFree.addEventListener("click", function () {
-      try {
-        localStorage.setItem("cairn-pro-pulse", "free");
-      } catch (_) {}
-      showPulseChoice("free");
+  function renderPulseCounts(counts) {
+    if (!counts) return;
+    var y = Number(counts.yes || 0);
+    var n = Number(counts.no || 0);
+    if (pulseYesCount) {
+      pulseYesCount.textContent = y > 0 ? String(y) : "Vote";
+    }
+    if (pulseFreeCount) {
+      pulseFreeCount.textContent = n > 0 ? String(n) : "Vote";
+    }
+  }
+
+  function setPulseStatus(msg, state) {
+    if (!pulseFeedback) return;
+    pulseFeedback.textContent = msg;
+    pulseFeedback.classList.toggle("is-confirmed", state === "ok");
+    pulseFeedback.classList.toggle("is-error", state === "err");
+  }
+
+  function submitPulseToEdge(choice, wishText) {
+    try {
+      localStorage.setItem("cairn-pro-pulse", choice);
+    } catch (_) {}
+    renderPulseSelection(choice);
+
+    if (!canCallPulseApi) {
+      setPulseStatus(
+        choice === "yes"
+          ? "Vote recorded! Optional: add what video preview would help most above."
+          : "Vote recorded — Cairn's core blocker & Workday Lock stay $0 forever.",
+        "ok"
+      );
+      return;
+    }
+
+    setPulseStatus("Saving your response...", "");
+    var payload = {
+      voterId: getOrCreateVoterId(),
+      choice: choice,
+      wish: wishText || "",
+      ref_source: refSource
+    };
+
+    fetch(pulseBase + "/api/pro-pulse", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      keepalive: true
+    })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (data) {
+        renderPulseCounts(data);
+        if (wishText) {
+          setPulseStatus("Saved your vote + feature note directly to our roadmap!", "ok");
+        } else if (choice === "yes") {
+          setPulseStatus(
+            "Counted! Optional: tell us what video preview would help most above.",
+            "ok"
+          );
+        } else {
+          setPulseStatus(
+            "Counted — Cairn's core blocker & Workday Lock stay $0 forever.",
+            "ok"
+          );
+        }
+      })
+      .catch(function () {
+        setPulseStatus("Saved on this browser (offline right now).", "ok");
+      });
+  }
+
+  if (pulseYes || pulseFree) {
+    try {
+      var prevChoice = localStorage.getItem("cairn-pro-pulse");
+      if (prevChoice === "free") prevChoice = "no";
+      if (prevChoice === "yes" || prevChoice === "no") {
+        renderPulseSelection(prevChoice);
+      }
+    } catch (_) {}
+
+    if (canCallPulseApi) {
+      fetch(pulseBase + "/api/pro-pulse")
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (data) {
+          renderPulseCounts(data);
+        })
+        .catch(function () {});
+    }
+
+    if (pulseYes) {
+      pulseYes.addEventListener("click", function () {
+        submitPulseToEdge(
+          "yes",
+          pulseNoteInput ? pulseNoteInput.value.trim() : ""
+        );
+      });
+    }
+
+    if (pulseFree) {
+      pulseFree.addEventListener("click", function () {
+        submitPulseToEdge(
+          "no",
+          pulseNoteInput ? pulseNoteInput.value.trim() : ""
+        );
+      });
+    }
+
+    if (pulseNoteForm && pulseNoteInput) {
+      pulseNoteForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var note = pulseNoteInput.value.trim();
+        if (!note) {
+          pulseNoteInput.focus();
+          setPulseStatus("Type a short feature wish above, or click Yes / Free to vote.", "");
+          return;
+        }
+        var activeChoice = selectedPulseChoice || "yes";
+        submitPulseToEdge(activeChoice, note);
+        pulseNoteInput.value = "";
+      });
+    }
+  }
+
+  /* ── 7. 1-Step WhatsApp / Email Release Drops Signup (Cloudflare D1) ──── */
+  var subForm = document.getElementById("wa-subscribe-form");
+  var subInput = document.getElementById("wa-contact-input");
+  var subFeedback = document.getElementById("wa-subscribe-feedback");
+
+  function setSubStatus(msg, state) {
+    if (!subFeedback) return;
+    subFeedback.textContent = msg;
+    subFeedback.classList.toggle("is-confirmed", state === "ok");
+    subFeedback.classList.toggle("is-error", state === "err");
+  }
+
+  if (subForm && subInput) {
+    subForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var raw = subInput.value.trim();
+      var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(raw);
+      var digits = raw.replace(/[^\d]/g, "");
+      var isPhone = !isEmail && digits.length >= 7 && digits.length <= 16;
+
+      if (!isEmail && !isPhone) {
+        subInput.focus();
+        setSubStatus(
+          "Enter a WhatsApp number (with country code, e.g. +1...) or email.",
+          "err"
+        );
+        return;
+      }
+
+      if (!canCallPulseApi) {
+        subInput.value = "";
+        setSubStatus(
+          isEmail
+            ? "You're on the list! We'll email you on major Cairn drops."
+            : "You're on the list! We'll ping your WhatsApp on major drops.",
+          "ok"
+        );
+        return;
+      }
+
+      setSubStatus("Saving...", "");
+      fetch(pulseBase + "/api/subscribe", {
+        method: "POST",
+        body: JSON.stringify({ contact: raw, ref_source: refSource }),
+        keepalive: true
+      })
+        .then(function (r) {
+          return r.json().then(function (d) {
+            return { ok: r.ok, data: d };
+          });
+        })
+        .then(function (res) {
+          if (!res.ok) {
+            setSubStatus(res.data.error || "Please check your WhatsApp number or email.", "err");
+            return;
+          }
+          subInput.value = "";
+          setSubStatus(
+            (res.data.channel_type || res.data.channel) === "email"
+              ? "You're on the list! We'll email you when major updates ship."
+              : "You're on the list! We'll ping your WhatsApp on major drops.",
+            "ok"
+          );
+        })
+        .catch(function () {
+          setSubStatus("Could not reach server — please try again in a moment.", "err");
+        });
     });
   }
 

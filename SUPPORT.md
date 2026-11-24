@@ -1,8 +1,8 @@
 # Cairn support
 
-For help with Cairn, [open an issue](https://github.com/mohdashraf010897/cairn-public/issues/new)
-in this public repository. A GitHub account is required to post. Once the
-extension is published, you can also use its Chrome Web Store Support hub.
+For help with Cairn, visit the [Chrome Web Store Support hub](https://chromewebstore.google.com/detail/cairn-%E2%80%94-intentional-viewi/faebackbnaagohmbebibnancofpgadfm/support)
+or [open an issue](https://github.com/mohdashraf010897/cairn-public/issues/new)
+in this public repository.
 
 Please include the Chrome version, Cairn version, what you expected, and what
 happened. Do not post PINs, browsing history, private viewing intentions, or

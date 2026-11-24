@@ -1,5 +1,7 @@
 # Cairn — Intentional Viewing
 
+Install free from the **[Chrome Web Store](https://chromewebstore.google.com/detail/cairn-%E2%80%94-intentional-viewi/faebackbnaagohmbebibnancofpgadfm)**.
+
 Cairn is a Chrome extension that helps people use desktop YouTube with a plan.
 It quiets distracting surfaces, asks for a viewing intention, and adds a pause
 before changing Focus Mode.
